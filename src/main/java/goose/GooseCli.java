@@ -10,8 +10,6 @@ public class GooseCli{
     Console cnsl = null;
 
     void GoseCli(){
-        // creates a console object
-        cnsl = System.console();
     }
 
     // Write text and Read command line

@@ -70,7 +70,6 @@ public class PlayersTest {
 		assertEquals(goseGame.eval("move Pippo 3, 3"),
  		   			 "Pippo rolls 3, 3. Pippo moves from 58 to 63. Pippo bounces! Pippo returns to 62");
 
-
 	}
 
 	// Search first match of numbers pair: 1, 4

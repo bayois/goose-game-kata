@@ -127,6 +127,7 @@ public class GooseGame {
 			outputMessage +=  "Invalid dice pair, "+ name + " don't try to cheat";
 			return outputMessage;
 		}
+		String defaultMove = name + " moves from " + position + " to " + nextPosition; 
 
 		// Wins or Bounce
 		if (nextPosition >= 63)
@@ -141,13 +142,13 @@ public class GooseGame {
 		} // The Bridge 
 		else if (nextPosition == 6)
 		{
-			outputMessage += name + " moves from " + position + " to " + nextPosition;
+			outputMessage += defaultMove; 
 			nextPosition = 12;
 			outputMessage += ". " + name + " jumps to " + nextPosition;
 		} // The Goose
 		else if ( isGoosePicture(nextPosition) )
 		{
-			outputMessage += name + " moves from " + position + " to " + nextPosition  ;
+			outputMessage += defaultMove; 
 			nextPosition += d1 + d2;
 			outputMessage += ", The Goose. " + name + " moves again and goes to " + nextPosition;
 			// Multiple Jump: TODO possible recursion
@@ -158,7 +159,7 @@ public class GooseGame {
 			}
 		} // Move
 		else {
-			outputMessage += name + " moves from " + position + " to " + nextPosition;
+			outputMessage += defaultMove; 
 		}
 		// Update player position
 		p.setPosition(nextPosition);
