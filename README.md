@@ -4,6 +4,7 @@ Goose game is a game where two or more players move pieces around a track by rol
 This kata has been invented by [Matteo Vaccari](https://github.com/xpmatteo), you can find the original slides [here](https://www.slideshare.net/pierodibello/il-dilettevole-giuoco-delloca-coding-dojo).
 
 ## General requirements
+Git
 Java 1.8
 Maven 3.6.0
 
