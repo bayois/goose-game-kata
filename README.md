@@ -5,14 +5,20 @@ This kata has been invented by [Matteo Vaccari](https://github.com/xpmatteo), yo
 
 ## General requirements
 Git
+
 Java 1.8
+
 Maven 3.6.0
 
 ## Install 
 git clone https://github.com/bayois/goose-game-kata.git
+
 cd goose-game-kata
+
 mvn clean package
+
 java -jar target/goose-game-kata-0.1.0.jar
+
 
 ## Features
 
