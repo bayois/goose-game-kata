@@ -5,67 +5,74 @@ import java.util.Random;
 
 public class GooseGame {
 	ArrayList<Player> players = new ArrayList<Player>();
-	GooseCli goseCli = new GooseCli();
-	int newPosition;
-	String reply;
 
 	public ArrayList<Player> getPlayers() {
 		return players;
 	}
 
+	/*
+	* Add a player
+	*/
 	public void addPlayer(String name) {
 		Player p = new Player(name);
 		players.add(p);
 	}
 
 	void start() {
+		GooseCli goseCli = new GooseCli();
+
 		String outputText = "Add one or more player to start, move your player or write help for command list";
 		String userText = "";
 
 		// Loop on user command until winner was found or exit request
 		while (! outputText.contains("Wins") && ! userText.equals("exit")) {
-			// Write output and Read user text
-			userText = goseCli.readCommand(outputText + System.lineSeparator());
-			// Eval user text
-			outputText = eval(userText);
+			try {
+				// Write output and Read user text
+				userText = goseCli.readCommand(outputText + System.lineSeparator());
+				// Eval user text
+				outputText = eval(userText);
+			} catch (Exception e) {
+				outputText = getHelp();
+			}
 		}
 		goseCli.write(outputText);
 	}
 
+	String getHelp(){
+		return System.lineSeparator()+"Command help" + System.lineSeparator() + 
+				"add player <Name>          : add a player to the game" + System.lineSeparator() +
+				"move <Name> [dice1,dice2]  : move player to next position giving dice value " + System.lineSeparator() +
+				"move <Name>                : move player to next position with automatic dice value " + System.lineSeparator() +
+				"show players               : show players positions " + System.lineSeparator() +
+				"help                       : print command help" + System.lineSeparator() +
+				"exit                       : exit the game" + System.lineSeparator() ;
+	}
+
 	// Read User Input and evaluate Action
 	String eval(String text) {
-		this.reply = "";
+		String outputMessage = "";
 
-		// Add a player user request 
-		if (text.startsWith("add player ")) {
+		if (text.startsWith("add player ")) { // Add a player user request 
 			// Get user name
 			String playerName = text.replace("add player ", "");
-			this.reply = addNewPlayer(playerName);
+			outputMessage = addNewPlayer(playerName);
 		} 
-		// Move player user request 
-		else if (text.startsWith("move ")) 
+		else if (text.startsWith("move ")) // Move player user request 
 		{
 			// Get move details
 			String move = text.replace("move ", "");
-			this.reply = movePlayer(move);
+			outputMessage = movePlayer(move);
 		} 
-		// Move player user request 
-		else if (text.startsWith("show ")) 
+		else if (text.equals("show players")) // Show players positions
 		{
-			this.reply = showPlayers();
+			outputMessage = showPlayers();
 		} 
-		
-		else {
-		// Print help
-			this.reply = System.lineSeparator()+"Command help" + System.lineSeparator() + 
-					"add player <Name>          : add a player to the game" + System.lineSeparator() +
-					"move <Name> [dice1,dice2]  : move player to next position giving dice value " + System.lineSeparator() +
-					"move <Name>                : move player to next position with automatic dice value " + System.lineSeparator() +
-					"show                       : show players positions " + System.lineSeparator() +
-					"help                       : print command help" + System.lineSeparator() +
-					"exit                       : exit the game" + System.lineSeparator() ;
+		else { 
+			// Print help
+			outputMessage = getHelp();
 		}
-		return this.reply;
+
+		return outputMessage;
 	}
 
 	/*
@@ -105,51 +112,73 @@ public class GooseGame {
 	  As a player, when I get to a space with a picture of "The Goose", I move forward again by the sum of the two dice rolled before
 	  The spaces 5, 9, 14, 18, 23, 27 have a picture of "The Goose"
 	 */
-	public void checkUserPosition(String[] dice, Player p) {
+	public String updatePlayerPosition(String[] dice, Player p) {
+		String outputMessage = "";
 		String name = p.getName();
 		int position = p.getPosition();
+
+		int d1 = Integer.parseInt(dice[0].trim()); 
+		int d2 = Integer.parseInt(dice[1].trim());
+		int nextPosition = position + d1 + d2;
+
+		// Check dice values
+		outputMessage = name + " rolls " + dice[0].trim() + ", " + dice[1].trim() + ". ";
+		if (d1 > 6 || d2 > 6){
+			outputMessage +=  "Invalid dice pair, "+ name + " don't try to cheat";
+			return outputMessage;
+		}
+
 		// Wins or Bounce
-		if (this.newPosition >= 63)
+		if (nextPosition >= 63)
 		{
-			this.reply += name + " moves from " + position + " to 63. ";
-			if (newPosition > 63) {
-				this.newPosition = 63 - (this.newPosition - 63);
-				this.reply += name + " bounces! " + name + " returns to " + this.newPosition;
+			outputMessage += name + " moves from " + position + " to 63. ";
+			if (nextPosition > 63) {
+				nextPosition = 63 - (nextPosition - 63);
+				outputMessage += name + " bounces! " + name + " returns to " + nextPosition;
 			} else {
-				this.reply += name + " Wins!!";
+				outputMessage += name + " Wins!!";
 			}
 		} // The Bridge 
-		else if (this.newPosition == 6)
+		else if (nextPosition == 6)
 		{
-			this.newPosition = 12;
-			this.reply += name + " moves from " + position + " to 6. " + 
-			 			  name + " jumps to " + this.newPosition;
+			outputMessage += name + " moves from " + position + " to " + nextPosition;
+			nextPosition = 12;
+			outputMessage += ". " + name + " jumps to " + nextPosition;
 		} // The Goose
-		else if ( this.newPosition == 5 || this.newPosition == 9 || this.newPosition == 14 || 
-				  this.newPosition == 18 || this.newPosition ==  23 || this.newPosition == 27 ) 
+		else if ( isGoosePicture(nextPosition) )
 		{
-			this.reply += name + " moves from " + position + " to " + this.newPosition + ", The Goose. ";
-			this.newPosition += Integer.parseInt(dice[0].trim()) + Integer.parseInt(dice[1].trim());
-			this.reply += name + " moves again and goes to " + this.newPosition;
+			outputMessage += name + " moves from " + position + " to " + nextPosition  ;
+			nextPosition += d1 + d2;
+			outputMessage += ", The Goose. " + name + " moves again and goes to " + nextPosition;
 			// Multiple Jump: TODO possible recursion
-			if ( this.newPosition == 5 || this.newPosition == 9 || this.newPosition == 14 || 
-				 this.newPosition == 18 || this.newPosition ==  23 || this.newPosition == 27 ) 
+			if ( isGoosePicture(nextPosition) )
 			{
-				this.newPosition += Integer.parseInt(dice[0].trim()) + Integer.parseInt(dice[1].trim());
-				this.reply += ", The Goose. " + name + " moves again and goes to " + this.newPosition;
+				nextPosition += d1 + d2;
+				outputMessage += ", The Goose. " + name + " moves again and goes to " + nextPosition;
 			}
 		} // Move
 		else {
-			this.reply += name + " moves from " + position + " to " + this.newPosition;
+			outputMessage += name + " moves from " + position + " to " + nextPosition;
 		}
 		// Update player position
-		p.setPosition(this.newPosition);
+		p.setPosition(nextPosition);
+
+		return outputMessage;
+	}
+
+	boolean isGoosePicture(int nextPosition){
+		if (nextPosition == 5 || nextPosition == 9 || nextPosition == 14 || 
+			nextPosition == 18 || nextPosition ==  23 || nextPosition == 27 ) 
+			return true;
+		else
+			return false;
 	}
 
 	/*
 	* Move the required player
 	*/
 	String movePlayer(String moveCommand) {
+		String outputMessage = "";
 		// Loop on players list 
 		for (int i = 0; i < getPlayers().size(); i++) {
 			String name = getPlayers().get(i).getName();
@@ -161,41 +190,29 @@ public class GooseGame {
 				if ( dice.length < 2){
 					dice = throwDice();
 				}
-
-				// Get new position
-				int d1 = Integer.parseInt(dice[0].trim()); 
-				int d2 = Integer.parseInt(dice[1].trim());
-				this.newPosition = getPlayers().get(i).getPosition() + d1 + d2;
-
-				// Move Message, user rolls
-				this.reply = name + " rolls " + dice[0].trim() + ", " + dice[1].trim() + ". ";
 				// Check dice values
-				if (d1 <= 6 && d2 <= 6){
-					checkUserPosition(dice, getPlayers().get(i));
+				outputMessage += updatePlayerPosition(dice, getPlayers().get(i))
+										.replace("from 0", "from Start")
+										.replace("to 6.", "to The Bridge.");
 
-					// Fix user output text
-					this.reply = this.reply.replace("from 0", "from Start");
-					this.reply = this.reply.replace("to 6.", "to The Bridge.");
-				}else{
-					this.reply +=  "Invalid dice pair, "+ name + " don't try to cheat";
-				}
 			}
 
 		}
 
-		return this.reply;
+		return outputMessage;
 	}
 	/*
 	* Show players positions
 	*/
 	public String showPlayers(){
+		String outputMessage = "";
 		for (int i = 0; i < getPlayers().size(); i++) {
-			this.reply += "Player name: " + getPlayers().get(i).getName() +
+			outputMessage += "Player name: " + getPlayers().get(i).getName() +
 						 " position: " + getPlayers().get(i).getPosition() + 
 						 System.lineSeparator(); 
 			
 		}
-		return this.reply;
+		return outputMessage;
 	}
 
 
