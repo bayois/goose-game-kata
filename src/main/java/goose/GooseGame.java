@@ -60,8 +60,8 @@ public class GooseGame {
 		else if (text.startsWith("move ")) // Move player user request 
 		{
 			// Get move details
-			String move = text.replace("move ", "");
-			outputMessage = movePlayer(move);
+			String playerName = text.replace("move ", "");
+			outputMessage = movePlayer(playerName);
 		} 
 		else if (text.equals("show players")) // Show players positions
 		{
@@ -181,10 +181,12 @@ public class GooseGame {
 	String movePlayer(String moveCommand) {
 		String outputMessage = "";
 		// Loop on players list 
-		for (int i = 0; i < getPlayers().size(); i++) {
+		for (int i = 0; i < getPlayers().size(); i++) 
+		{
 			String name = getPlayers().get(i).getName();
 			// Search requested player
-			if (moveCommand.startsWith(name)){
+			if (moveCommand.contains(name))
+			{
 				// Get dice numbers
 				String[] dice = moveCommand.replace(name, "").trim().split(",");
 				// Check dice user value 
