@@ -6,7 +6,7 @@ import java.io.Console;
 * Gose Game: Console handler
 * read user input command and reply 
 */
-public class GoseCli{
+public class GooseCli{
     Console cnsl = null;
 
     void GoseCli(){
@@ -14,6 +14,7 @@ public class GoseCli{
         cnsl = System.console();
     }
 
+    // Write text and Read command line
     String readCommand(String outputText) {
         String cmd = null;
         try {
@@ -25,6 +26,7 @@ public class GoseCli{
         return cmd;
     }
 
+    // Write command line
     void write(String outputText){
         System.out.print(outputText);
     }
