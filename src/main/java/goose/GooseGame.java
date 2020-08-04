@@ -11,13 +11,16 @@ public class GooseGame {
 	}
 
 	/*
-	* Add a player
+	* Add a single player to the list
 	*/
 	public void addPlayer(String name) {
 		Player p = new Player(name);
 		players.add(p);
 	}
 
+	/*
+	* Start the Game, play until winner or exit found
+	*/
 	void start() {
 		GooseCli goseCli = new GooseCli();
 
@@ -38,6 +41,9 @@ public class GooseGame {
 		goseCli.write(outputText);
 	}
 
+	/*
+	* Help command
+	*/
 	String getHelp(){
 		return System.lineSeparator()+"Command help" + System.lineSeparator() + 
 				"add player <Name>          : add a player to the game" + System.lineSeparator() +
@@ -48,27 +54,31 @@ public class GooseGame {
 				"exit                       : exit the game" + System.lineSeparator() ;
 	}
 
-	// Read User Input and evaluate Action
-	String eval(String text) {
+	/*
+	 * Read User Input from cli and evaluate Game Action. 
+	 * 
+	 * @param playerText
+	 * @return result message
+	*/
+	String eval(String playerText) {
 		String outputMessage = "";
 
-		if (text.startsWith("add player ")) { // Add a player user request 
+		if (playerText.startsWith("add player ")) { // Add a player user request 
 			// Get user name
-			String playerName = text.replace("add player ", "");
+			String playerName = playerText.replace("add player ", "");
 			outputMessage = addNewPlayer(playerName);
 		} 
-		else if (text.startsWith("move ")) // Move player user request 
+		else if (playerText.startsWith("move ")) // Move player user request 
 		{
 			// Get move details
-			String playerName = text.replace("move ", "");
+			String playerName = playerText.replace("move ", "");
 			outputMessage = movePlayer(playerName);
 		} 
-		else if (text.equals("show players")) // Show players positions
+		else if (playerText.equals("show players")) // Show players positions
 		{
 			outputMessage = showPlayers();
 		} 
-		else { 
-			// Print help
+		else { // Print help
 			outputMessage = getHelp();
 		}
 
@@ -80,18 +90,18 @@ public class GooseGame {
 	*/
 	String addNewPlayer(String name) {
 		// Loop on player names
-		String command = "players: ";
-		for (int i = 0; i < getPlayers().size(); i++) {
-			command += getPlayers().get(i).getName() + ", ";
+		String outpuMessage = "players: ";
+		for (Player p : getPlayers() ){
+			outpuMessage += p.getName() + ", ";
 			// Check if already exist
-			if ( getPlayers().get(i).getName().equals(name))
+			if ( p.getName().equals(name))
 				return name + ": already existing player";
 		}
 		// If not found add new player
 		addPlayer(name);
-		command += name;
+		outpuMessage += name;
 
-		return command;
+		return outpuMessage;
 	}
 
 	/*
@@ -106,12 +116,15 @@ public class GooseGame {
 	}
 
 	/*
-	 Check the player landing position and apply Goose Rules:
-	  As a player, I win the game if I land on space "63"
-	  As a player, when I get to the space 6, "The Bridge", I jump to the space "12"
-	  As a player, when I get to a space with a picture of "The Goose", I move forward again by the sum of the two dice rolled before
-	  The spaces 5, 9, 14, 18, 23, 27 have a picture of "The Goose"
-	 */
+	* Check the player landing position and update next position according to Goose Rules:
+	* As a player, I win the game if I land on space "63"
+	* As a player, when I get to the space 6, "The Bridge", I jump to the space "12"
+	* As a player, when I get to a space with a picture of "The Goose", I move forward again by the sum of the two dice rolled before
+	* The spaces 5, 9, 14, 18, 23, 27 have a picture of "The Goose"
+    * If there are two participants "Pippo" and "Pluto" respectively on spaces "15" and "17"
+	*
+	* @return ouputMessage
+	*/
 	public String updatePlayerPosition(String[] dice, Player p) {
 		String outputMessage = "";
 		String name = p.getName();
@@ -127,6 +140,7 @@ public class GooseGame {
 			outputMessage +=  "Invalid dice pair, "+ name + " don't try to cheat";
 			return outputMessage;
 		}
+		// Default Move message
 		String defaultMove = name + " moves from " + position + " to " + nextPosition; 
 
 		// Wins or Bounce
@@ -145,7 +159,7 @@ public class GooseGame {
 			outputMessage += defaultMove; 
 			nextPosition = 12;
 			outputMessage += ". " + name + " jumps to " + nextPosition;
-		} // The Goose
+		} // The Goose, Single Jump
 		else if ( isGoosePicture(nextPosition) )
 		{
 			outputMessage += defaultMove; 
@@ -160,6 +174,14 @@ public class GooseGame {
 		} // Move
 		else {
 			outputMessage += defaultMove; 
+			// Another player on same position goes back
+			for (Player p2: getPlayers() ){
+				if ( ! p2.equals(p) && p2.getPosition() == nextPosition ){
+					p2.setPosition(position);
+					outputMessage += ". On " + nextPosition + " there is " + p2.getName() + 
+									 ", who returns to " + position; 
+				}
+			}
 		}
 		// Update player position
 		p.setPosition(nextPosition);
@@ -167,23 +189,30 @@ public class GooseGame {
 		return outputMessage;
 	}
 
+	/*
+	* Check if positin is Goose
+	*/
 	boolean isGoosePicture(int nextPosition){
 		if (nextPosition == 5 || nextPosition == 9 || nextPosition == 14 || 
 			nextPosition == 18 || nextPosition ==  23 || nextPosition == 27 ) 
+		{
 			return true;
-		else
+		}else{
 			return false;
+		}
 	}
 
 	/*
-	* Move the required player
+	* Move command, update the required player position
+	*
+	* @return outputMessage
 	*/
 	String movePlayer(String moveCommand) {
 		String outputMessage = "";
 		// Loop on players list 
-		for (int i = 0; i < getPlayers().size(); i++) 
+		for (Player p : getPlayers() ) 
 		{
-			String name = getPlayers().get(i).getName();
+			String name = p.getName();
 			// Search requested player
 			if (moveCommand.contains(name))
 			{
@@ -193,11 +222,10 @@ public class GooseGame {
 				if ( dice.length < 2){
 					dice = throwDice();
 				}
-				// Check dice values
-				outputMessage += updatePlayerPosition(dice, getPlayers().get(i))
-										.replace("from 0", "from Start")
-										.replace("to 6.", "to The Bridge.");
-
+				// Update player position and verify Goose rules
+				outputMessage += updatePlayerPosition(dice, p)
+								.replace("from 0", "from Start")
+								.replace("to 6.", "to The Bridge.");
 			}
 
 		}
@@ -209,14 +237,11 @@ public class GooseGame {
 	*/
 	public String showPlayers(){
 		String outputMessage = "";
-		for (int i = 0; i < getPlayers().size(); i++) {
-			outputMessage += "Player name: " + getPlayers().get(i).getName() +
-						 " position: " + getPlayers().get(i).getPosition() + 
+		for (Player p : getPlayers() ){ 
+			outputMessage += "Player name: " + p.getName() + " position: " + p.getPosition() + 
 						 System.lineSeparator(); 
 			
 		}
 		return outputMessage;
 	}
-
-
 }

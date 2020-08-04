@@ -158,13 +158,20 @@ public class PlayersTest {
 	// As a player, when I land on a space occupied by another player, I send him to my previous position so that the game can be more entertaining.
 	@Test
 	public void prankPlayer() {
-		/*
-		If there are two participants "Pippo" and "Pluto" respectively on spaces "15" and "17"
-		assuming that the dice get 1 and 1
-		when the user writes: "move Pippo"
-		the system responds: "Pippo rolls 1, 1. Pippo moves from 15 to 17. On 17 there is Pluto, who returns to 15"
-		*/
-		
+		assertEquals(goseGame.eval("add player Pippo"), "players: Pippo"); 
+		assertEquals(goseGame.eval("add player Pluto"), "players: Pippo, Pluto"); 
+
+		goseGame.getPlayers().get(0).setPosition(15);
+		goseGame.getPlayers().get(1).setPosition(17);
+		assertEquals(goseGame.eval("move Pippo 1, 1"), 
+					"Pippo rolls 1, 1. Pippo moves from 15 to 17. On 17 there is Pluto, who returns to 15");
+		assertEquals(goseGame.getPlayers().get(1).getPosition(), 15);
+
+		goseGame.getPlayers().get(0).setPosition(5);
+		goseGame.getPlayers().get(1).setPosition(10);
+		assertEquals(goseGame.eval("move Pippo 3, 2"), 
+					"Pippo rolls 3, 2. Pippo moves from 5 to 10. On 10 there is Pluto, who returns to 5");
+		assertEquals(goseGame.getPlayers().get(1).getPosition(), 5);
 	}
 
 }
