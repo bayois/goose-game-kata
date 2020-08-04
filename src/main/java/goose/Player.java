@@ -1,5 +1,4 @@
-package hello;
-
+package goose;
 
 public class Player {
     String name;

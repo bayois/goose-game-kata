@@ -1,4 +1,4 @@
-package hello;
+package goose;
 
 import java.io.Console;
 
