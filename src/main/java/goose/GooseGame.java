@@ -136,7 +136,7 @@ public class GooseGame {
 
 		// Check dice values
 		outputMessage = name + " rolls " + dice[0].trim() + ", " + dice[1].trim() + ". ";
-		if (d1 > 6 || d2 > 6){
+		if (d1 > 6 || d2 > 6 || d1 < 1 || d2 < 1 ){
 			outputMessage +=  "Invalid dice pair, "+ name + " don't try to cheat";
 			return outputMessage;
 		}
